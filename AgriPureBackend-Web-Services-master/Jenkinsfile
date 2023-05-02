@@ -11,18 +11,18 @@ pipeline {
 
     stage('Build') {
       steps {
-        // Build the code
+        // 
         sh 'mvn clean package'
       }
     }
 
     stage('Cucumber tests') {
       steps {
-        // Run Cucumber tests with Maven
+        // 
         sh 'mvn verify -Pcucumber-tests'
       }
       post {
-        // Archive test results for viewing in Jenkins UI
+        // 
         cucumberReport 'target/cucumber-reports/report.json'
       }
     }
