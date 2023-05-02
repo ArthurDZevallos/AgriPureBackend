@@ -1,53 +1,30 @@
 pipeline {
-    agent any
-    tools { 
-        maven 'MAVEN_3_9_1'
-        jdk 'JDK_1_11' 
+  agent any
+
+  stages {
+    stage('Checkout') {
+      steps {
+        // Checkout the source code from a Git repository
+        checkout scm
+      }
     }
-	
-    stages {
-        stage ('Compile Stage 2022-02') {
 
-            steps {
-                withMaven(maven : 'MAVEN_3_9_1') {
-                    sh 'mvn clean compile'
-                }
-            }
-        }
-
-        stage ('Testing Stage 2022-02') {
-
-            steps {
-                withMaven(maven : 'MAVEN_3_9_1') {
-                    sh 'mvn test'
-                }
-            }
-        }
-
-	/* stage ('sonarQube Analysis') {
-		steps {
-			withSonarQubeEnv('sonarLocal') {
-				sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=one'
-			}
-		}
-	}*/
-/*
-        stage ('package Stage') {
-            steps {
-                withMaven(maven : 'MAVEN_3_6_3') {
-                    sh 'mvn package'
-                }
-            }
-        }*/
-		/* // Descomentar cuando se tenga instalado en Tomcat
-		stage('Deploy tomcat') {
-            steps {
-                echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL} direcion ${env.WORKSPACE}"	
-                withMaven(maven : 'MAVEN_3_6_3') {
-					bat '"C:\\Program Files\\Git\\mingw64\\bin\\curl.exe" -T ".\\target\\sistema-ventas-spring.war" "http://tomcat:tomcat@localhost:9090/manager/text/deploy?path=/sistema-ventas-spring&update=true"'
-                } 
-            }
-        }*/
-
+    stage('Build') {
+      steps {
+        // Build the code
+        sh 'mvn clean package'
+      }
     }
+
+    stage('Cucumber tests') {
+      steps {
+        // Run Cucumber tests with Maven
+        sh 'mvn verify -Pcucumber-tests'
+      }
+      post {
+        // Archive test results for viewing in Jenkins UI
+        cucumberReport 'target/cucumber-reports/report.json'
+      }
+    }
+  }
 }
